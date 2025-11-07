@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "MetaTKClient",
+    "slug": "MetaTKClient",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "metatkclient",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "config": {
+        "googl  eMapsApikey": "process.env.GOOGLE_MAPS_API_KEY"
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "주변 상권 확인을 위해 위치 정보 접근이 필요합니다.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "정확한 위치 기반 서비스를 제공하기 위해 백그라운드에서도 위치 접근이 필요합니다."
+      },
+      "supportsTablet": true,
+      "bundleIdentifier": "com.metatk.client"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "process.env.GOOGLE_MAPS_API_KEY"
+        }
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "CAMERA",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "CAMERA",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.metatk.client"
+    },
+    "web": {
+      "output": "static"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "소상공인 확인서 촬영을 위해 카메라 접근이 필요합니다."
+        }
+      ]
+    ]
+  }
+}

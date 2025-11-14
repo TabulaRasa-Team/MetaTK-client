@@ -79,3 +79,11 @@ export interface StoreDetailedInfo {
   images: string[];
   ratio: StoreRatio;
 }
+
+export interface OcrResponse {
+  company_name: string;
+  business_number: string;
+  representative_name: string;
+  opening_date: string;
+  parsed: boolean;
+}

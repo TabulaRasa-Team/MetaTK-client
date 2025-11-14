@@ -4,18 +4,22 @@ import styled from "styled-components/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TYPOGRAPHY } from "../../constants/typography";
 import Button from "../../components/ui/Button";
-import { useNavigation } from "@react-navigation/native";
-import type { NavigationProp } from "@react-navigation/native";
-import type { RootStackParamList } from "../../types/navigation";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import type { NavigationProp, RouteProp } from "@react-navigation/native";
+import type { RootStackParamList, RegisterStackParamList } from "../../types/navigation";
 import BackButton from "../../components/common/BackButton";
 import TitleSubtitle from "../../components/common/TitleSubtitle";
+
+type OcrCheckingScreenRouteProp = RouteProp<RegisterStackParamList, 'OcrCheckingScreen'>;
 
 export default function OcrCheckingScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [companyName, setCompanyName] = useState("");
-  const [businessNumber, setBusinessNumber] = useState("");
-  const [ceoName, setCeoName] = useState("");
+  const route = useRoute<OcrCheckingScreenRouteProp>();
+
+  const [openingDate, setOpeningDate] = useState(route.params?.openingDate || "");
+  const [businessNumber, setBusinessNumber] = useState(route.params?.businessNumber || "");
+  const [ceoName, setCeoName] = useState(route.params?.representativeName || "");
 
   return (
     <Container style={{ paddingBottom: insets.bottom + 16 }}>
@@ -23,8 +27,8 @@ export default function OcrCheckingScreen() {
       <TitleSubtitle title="이 정보가 확실한가요?" subtitle="해당 정보는 나중에 수정할 수 없어요." style={{ marginBottom: 48, marginLeft: 12 }} />
 
       <Form>
-        <Label>기업명</Label>
-        <Input value={companyName} onChangeText={setCompanyName} placeholder="기업명" placeholderTextColor="#8795a1" />
+        <Label>개업 날짜</Label>
+        <Input value={openingDate} onChangeText={setOpeningDate} placeholder="20250813" placeholderTextColor="#8795a1" />
 
         <Label>사업자등록번호</Label>
         <Input value={businessNumber} onChangeText={setBusinessNumber} placeholder="000000-0000000" placeholderTextColor="#8795a1" />

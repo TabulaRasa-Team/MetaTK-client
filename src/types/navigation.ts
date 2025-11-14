@@ -9,7 +9,12 @@ export type RootStackParamList = {
 
 export type RegisterStackParamList = {
   OcrScreen: undefined;
-  OcrCheckingScreen: undefined;
+  OcrCheckingScreen: {
+    companyName: string;
+    businessNumber: string;
+    representativeName: string;
+    openingDate: string;
+  };
   RegistMainInfoScreen: undefined;
   RegistPictureInfoScreen: undefined;
   RegistSubInfoScreen: undefined;

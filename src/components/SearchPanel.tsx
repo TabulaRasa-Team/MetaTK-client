@@ -7,6 +7,7 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import OverallStatus from "./OverallStatus";
 import { TYPOGRAPHY } from "../constants/typography";
 import Marker from "./Marker";
+import { useOccupations } from "../hooks/api/useOccupations";
 
 type Props = {
   query: string;
@@ -27,6 +28,23 @@ export default function SearchPanel({
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['15%', '50%', '90%'], []);
   const [sheetIndex, setSheetIndex] = useState(0);
+  const { data: occupationData } = useOccupations();
+
+  const chartData = useMemo(() => {
+    if (!occupationData) {
+      return [
+        { name: '신라', value: 33, color: '#E19B2E' },
+        { name: '고구려', value: 34, color: '#B03C3C' },
+        { name: '백제', value: 33, color: '#3D63FF' },
+      ];
+    }
+
+    return [
+      { name: '신라', value: occupationData.shinla_ratio, color: '#E19B2E' },
+      { name: '고구려', value: occupationData.goguryeo_ratio, color: '#B03C3C' },
+      { name: '백제', value: occupationData.baekjae_ratio, color: '#3D63FF' },
+    ];
+  }, [occupationData]);
 
   return (
     <Container pointerEvents="box-none" $bottomPadding={0}>
@@ -89,13 +107,7 @@ export default function SearchPanel({
               </Horizontal>
             </ContentContainer>
             <ContentContainer>
-              <OverallStatus
-                data={[
-                  { name: '신라', value: 33, color: '#E19B2E' },
-                  { name: '고구려', value: 34, color: '#B03C3C' },
-                  { name: '백제', value: 33, color: '#3D63FF' },
-                ]}
-              />
+              <OverallStatus data={chartData} />
             </ContentContainer>
           </Content>
           )}

@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "ios": {
       "config": {
-        "googl  eMapsApikey": "process.env.GOOGLE_MAPS_API_KEY"
+        "googleMapsApikey": "process.env.GOOGLE_MAPS_API_KEY"
       },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "주변 상권 확인을 위해 위치 정보 접근이 필요합니다.",

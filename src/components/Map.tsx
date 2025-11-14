@@ -35,6 +35,34 @@ export default function Map({ markers, mapRef, onMarkerPress }: { markers?: MapP
     }));
   }, [coordinates]);
 
+  const getPinIconName = (storeType?: string): 'pin' | 'cafePin' | 'foodPin' => {
+    switch (storeType) {
+      case 'cafe':
+        return 'cafePin';
+      case 'food':
+        return 'foodPin';
+      case 'drink':
+        return 'pin';
+      default:
+        return 'pin';
+    }
+  };
+
+  const getPinColor = (team?: string): string => {
+    switch (team) {
+      case '고구려':
+        return '#C73434';
+      case '백제':
+        return '#2D3EFF';
+      case '신라':
+        return '#FF992D';
+      case '미점령':
+        return '#E5E7EB';
+      default:
+        return '#E5E7EB';
+    }
+  };
+
   return (
     <MapView
       ref={mapRef}
@@ -52,9 +80,14 @@ export default function Map({ markers, mapRef, onMarkerPress }: { markers?: MapP
           onPress={() => onMarkerPress?.(m)}
         >
           <MarkerContainer>
-            <Icon name="pin" width={60} height={75} />
+            <Icon
+              name={getPinIconName(m.description)}
+              width={60}
+              height={75}
+              primaryColor={getPinColor(m.team)}
+            />
             {m.title && <IconText>{m.title}</IconText>}
-            {m.description && <IconSub>{m.description}</IconSub>}
+            {m.team && <IconSub>{m.team}</IconSub>}
           </MarkerContainer>
         </Marker>
       ))}

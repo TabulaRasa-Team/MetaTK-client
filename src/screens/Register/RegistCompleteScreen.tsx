@@ -6,13 +6,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import { TYPOGRAPHY } from "../../constants/typography";
 import Button from "../../components/ui/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import type { NavigationProp } from "@react-navigation/native";
-import type { RootStackParamList } from "../../types/navigation";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import type { NavigationProp, RouteProp } from "@react-navigation/native";
+import type { RootStackParamList, RegisterStackParamList } from "../../types/navigation";
+
+type RegistCompleteScreenRouteProp = RouteProp<RegisterStackParamList, 'RegistCompleteScreen'>;
 
 export default function RegistCompleteScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const route = useRoute<RegistCompleteScreenRouteProp>();
 
   return (
     <Container>
@@ -30,17 +33,24 @@ export default function RegistCompleteScreen() {
           </LinearGradient>
         </Ring>
 
-        <Title>등록 완료!</Title>
-        <Desc>가게 등록이 완료되었습니다</Desc>
-        <Desc>이제부터 삼국의 국민들이</Desc>
-        <Desc>당신의 가게를 점령하러 올 것입니다</Desc>
+        <Title>가게 생성 완료!</Title>
+        <Desc>가게가 성공적으로 생성되었습니다</Desc>
+        <Desc>이제 가게 정보를 입력해주세요</Desc>
       </Center>
 
       <Buttons style={{ paddingBottom: insets.bottom + 16 }}>
         <Button
-          title="완료"
+          title="다음으로"
           variant="primary"
-          onPress={() => navigation.navigate({ name: 'Home', params: { screen: 'MainScreen' } })}
+          onPress={() => navigation.navigate({
+            name: 'Register',
+            params: {
+              screen: 'RegistSubInfoScreen',
+              params: {
+                storeId: route.params.storeId,
+              }
+            }
+          })}
         />
       </Buttons>
     </Container>

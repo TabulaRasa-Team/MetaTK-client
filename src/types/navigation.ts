@@ -9,11 +9,31 @@ export type RootStackParamList = {
 
 export type RegisterStackParamList = {
   OcrScreen: undefined;
-  OcrCheckingScreen: undefined;
-  RegistMainInfoScreen: undefined;
-  RegistPictureInfoScreen: undefined;
-  RegistSubInfoScreen: undefined;
-  RegistCompleteScreen: undefined;
+  OcrCheckingScreen: {
+    companyName: string;
+    businessNumber: string;
+    representativeName: string;
+    openingDate: string;
+  };
+  RegistMainInfoScreen: {
+    businessNumber?: string;
+    representativeName?: string;
+    openingDate?: string;
+  };
+  RegistPictureInfoScreen: {
+    businessNumber?: string;
+    representativeName?: string;
+    openingDate?: string;
+    address: string;
+    phone: string;
+    weeklyHours: { [key: string]: { start: string; end: string } };
+  };
+  RegistCompleteScreen: {
+    storeId: string;
+  };
+  RegistSubInfoScreen: {
+    storeId: string;
+  };
 };
 
 export type HomeStackParamList = {
@@ -35,8 +55,12 @@ export type CouponStackParamList = {
 };
 
 export type RestaurantStackParamList = {
-  RestaurantInfoScreen: undefined;
-  ChatBotScreen: undefined;
+  RestaurantInfoScreen: {
+    storeId?: string;
+  };
+  ChatBotScreen: {
+    storeId?: string;
+  };
 };
 
 declare global {

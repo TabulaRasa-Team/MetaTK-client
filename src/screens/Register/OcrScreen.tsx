@@ -1,23 +1,94 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View } from "react-native";
-import styled from "styled-components/native";
-import { CameraView, useCameraPermissions } from "expo-camera";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import type { NavigationProp } from "@react-navigation/native";
-import type { RootStackParamList } from "../../types/navigation";
+import { useNavigation } from "@react-navigation/native";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
+import React, { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import styled from "styled-components/native";
 import { TYPOGRAPHY } from "../../constants/typography";
+import type { RootStackParamList } from "../../types/navigation";
+import { ocrApi } from "../../utils/api/ocr";
 
 export default function OcrScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [permission, requestPermission] = useCameraPermissions();
   const insets = useSafeAreaInsets();
   const [isBusy, setIsBusy] = useState(false);
+  const cameraRef = useRef<CameraView>(null);
 
   useEffect(() => {
     if (!permission?.granted) requestPermission();
   }, [permission]);
+
+  const processOcrImage = async (imageUri: string) => {
+    try {
+      setIsBusy(true);
+      const ocrResult = await ocrApi.uploadImage(imageUri);
+
+      navigation.navigate({
+        name: 'Register',
+        params: {
+          screen: 'OcrCheckingScreen',
+          params: {
+            companyName: ocrResult.company_name,
+            businessNumber: ocrResult.business_number,
+            representativeName: ocrResult.representative_name,
+            openingDate: ocrResult.opening_date,
+          },
+        },
+      });
+    } catch (error) {
+      console.error('OCR 처리 실패:', error);
+      Alert.alert('오류', 'OCR 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handleCapture = async () => {
+    if (isBusy || !cameraRef.current) return;
+
+    try {
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.8,
+      });
+
+      if (!photo) {
+        Alert.alert('오류', '사진 촬영에 실패했습니다.');
+        return;
+      }
+
+      await processOcrImage(photo.uri);
+    } catch (error) {
+      console.error('사진 촬영 실패:', error);
+      Alert.alert('오류', '사진 촬영에 실패했습니다.');
+      setIsBusy(false);
+    }
+  };
+
+  const handleGalleryPick = async () => {
+    if (isBusy) return;
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets[0]) {
+        return;
+      }
+
+      await processOcrImage(result.assets[0].uri);
+    } catch (error) {
+      console.error('갤러리 선택 실패:', error);
+      Alert.alert('오류', '이미지 선택에 실패했습니다.');
+      setIsBusy(false);
+    }
+  };
 
   return (
     <Container>
@@ -33,6 +104,7 @@ export default function OcrScreen() {
         <CameraBox>
           {permission?.granted && (
             <CameraView
+              ref={cameraRef}
               style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
               facing="back"
             />
@@ -46,19 +118,19 @@ export default function OcrScreen() {
         </CameraBox>
       </Overlay>
 
+      {isBusy && (
+        <LoadingOverlay>
+          <ActivityIndicator size="large" color="#36DBFF" />
+          <LoadingText>OCR 처리 중...</LoadingText>
+        </LoadingOverlay>
+      )}
+
       <BottomBar style={{ bottom: insets.bottom + 24 }}>
-        <Shutter disabled={isBusy} onPress={() => {
-          if (isBusy) return;
-          // 촬영 트리거 → 확인 화면으로 이동
-          // 실제 촬영/업로드 로직은 후속 단계에서 연결
-          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-          setIsBusy(true);
-          // 간단한 딜레이 후 이동
-          setTimeout(() => {
-            setIsBusy(false);
-            navigation.navigate({ name: 'Register', params: { screen: 'OcrCheckingScreen' } });
-          }, 300);
-        }} />
+        <GalleryButton disabled={isBusy} onPress={handleGalleryPick}>
+          <Ionicons name="images" size={28} color="#E6F1F7" />
+        </GalleryButton>
+        <Shutter disabled={isBusy} onPress={handleCapture} />
+        <Spacer />
         <Progress />
       </BottomBar>
     </Container>
@@ -167,6 +239,17 @@ const BottomBar = styled.View`
   align-items: center;
 `;
 
+const GalleryButton = styled.Pressable`
+  position: absolute;
+  left: 40px;
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background-color: rgba(54, 219, 255, 0.3);
+  align-items: center;
+  justify-content: center;
+`;
+
 const Shutter = styled.Pressable`
   width: 76px;
   height: 76px;
@@ -176,6 +259,13 @@ const Shutter = styled.Pressable`
   border-color: rgba(255,255,255,0.4);
 `;
 
+const Spacer = styled.View`
+  width: 56px;
+  height: 56px;
+  position: absolute;
+  right: 40px;
+`;
+
 const Progress = styled.View`
   margin-top: 12px;
   width: 60%;
@@ -183,4 +273,23 @@ const Progress = styled.View`
   border-radius: 3px;
   background-color: rgba(255,255,255,0.35);
   align-self: center;
+`;
+
+const LoadingOverlay = styled.View`
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 100;
+`;
+
+const LoadingText = styled.Text`
+  color: #97C3DC;
+  font-size: 16px;
+  ${TYPOGRAPHY.SECTION_1}
 `;

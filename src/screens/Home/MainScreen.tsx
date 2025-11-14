@@ -11,6 +11,8 @@ import StoreModal from "../../components/StoreModal";
 import { useStores } from "../../hooks/api/useStores";
 import type { RootStackParamList } from "../../types/navigation";
 import { geocodeAddress } from "../../utils/geocode";
+import { storeApi } from "../../utils/api";
+import { getTeamFromRatio } from "../../utils/teamFromRatio";
 
 export default function MainScreen() {
   const [query, setQuery] = useState("");
@@ -37,15 +39,33 @@ export default function MainScreen() {
       for (const store of storesData) {
         const coords = await geocodeAddress(store.address);
         if (coords) {
-          convertedPins.push({
-            id: store.store_id,
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-            title: store.store_name,
-            description: store.store_type,
-            team: store.team || getTeamFromStoreType(store.store_type),
-            hours: '11:00 - 20:00',
-          });
+          try {
+            // 각 가게의 상세 정보를 가져와서 ratio 기반으로 팀 결정
+            const storeDetail = await storeApi.getStoreDetail(store.store_id);
+            const team = getTeamFromRatio(storeDetail.ratio);
+
+            convertedPins.push({
+              id: store.store_id,
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+              title: store.store_name,
+              description: store.store_type,
+              team: team,
+              hours: '11:00 - 20:00',
+            });
+          } catch (error) {
+            console.error(`Failed to fetch store detail for ${store.store_id}:`, error);
+            // 에러 발생 시 기본값으로 '미점령' 사용
+            convertedPins.push({
+              id: store.store_id,
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+              title: store.store_name,
+              description: store.store_type,
+              team: '미점령',
+              hours: '11:00 - 20:00',
+            });
+          }
         }
       }
 
@@ -54,15 +74,6 @@ export default function MainScreen() {
 
     convertAddressesToPins();
   }, [storesData]);
-
-  const getTeamFromStoreType = (storeType: string): string => {
-    const teamMap: Record<string, string> = {
-      'food': '고구려',
-      'drink': '신라',
-      'cafe': '백제',
-    };
-    return teamMap[storeType] || '고구려';
-  };
 
   return (
     <View style={{ flex: 1 }}>

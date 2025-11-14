@@ -56,8 +56,10 @@ export default function Map({ markers, mapRef, onMarkerPress }: { markers?: MapP
         return '#2D3EFF';
       case '신라':
         return '#FF992D';
+      case '미점령':
+        return '#E5E7EB';
       default:
-        return '#C73434';
+        return '#E5E7EB';
     }
   };
 

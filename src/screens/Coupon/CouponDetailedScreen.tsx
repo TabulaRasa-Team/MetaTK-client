@@ -1,14 +1,15 @@
+import type { RouteProp } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import React from "react";
-import { View, ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import styled from "styled-components/native";
-import QRCode from "react-native-qrcode-svg";
 import BackButton from "../../components/common/BackButton";
-import { useRoute } from "@react-navigation/native";
-import type { RouteProp } from "@react-navigation/native";
-import type { CouponStackParamList } from "../../types/navigation";
+import QRBackground from "../../components/Icon/Icons/QRBackground";
 import { TYPOGRAPHY } from "../../constants/typography";
 import { useCouponDetail } from "../../hooks/api/useCouponDetail";
+import type { CouponStackParamList } from "../../types/navigation";
 
 type Route = RouteProp<CouponStackParamList, 'CouponDetailedScreen'>;
 
@@ -90,14 +91,20 @@ export default function CouponDetailedScreen() {
       <Content>
         <View style={{ gap: 12 }}>
           <QRWrap>
-            <QRCode
-              value={displayCoupon.coupon_id}
-              size={260}
-              backgroundColor="transparent"
-              color="#62D0FF"
-            />
+            <QRBackgroundContainer>
+              <QRBackground width={201} height={201} />
+            </QRBackgroundContainer>
+            <QRCodeContainer>
+              <QRCode
+                value={displayCoupon.coupon_id}
+                size={160}
+                backgroundColor="transparent"
+                color="#62D0FF"
+                ecl="H"
+              />
+            </QRCodeContainer>
           </QRWrap>
-          <Title>{`${displayCoupon.coupon_name} *1000원* 할인권`}</Title>
+          <Title>{`${displayCoupon.coupon_name}`}</Title>
           <Desc>아래에서 쿠폰을 사용할 수 있는 매장 정보를 확인해보세요</Desc>
         </View>
 
@@ -141,11 +148,24 @@ const Content = styled.View`
 
 const QRWrap = styled.View`
   align-self: center;
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(7, 24, 40, 0.6);
-  border-width: 1px;
-  border-color: rgba(255,255,255,0.06);
+  position: relative;
+  width: 201px;
+  height: 201px;
+  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const QRBackgroundContainer = styled.View`
+  position: absolute;
+  width: 201px;
+  height: 201px;
+`;
+
+const QRCodeContainer = styled.View`
+  position: absolute;
+  align-items: center;
+  justify-content: center;
 `;
 
 const Title = styled.Text`

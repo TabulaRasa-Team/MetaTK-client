@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { View } from "react-native";
 import Map, { MapPin } from "../../components/Map";
 import MapView from "react-native-maps";
@@ -10,17 +10,52 @@ import StoreModal from "../../components/StoreModal";
 import { useNavigation } from "@react-navigation/native";
 import type { NavigationProp } from "@react-navigation/native";
 import type { RootStackParamList } from "../../types/navigation";
+import { useStores } from "../../hooks/api/useStores";
 
 export default function MainScreen() {
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected] = useState<MapPin | null>(null);
+  const [pins, setPins] = useState<MapPin[]>([]);
   const mapRef = useRef<MapView | null>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const pins: MapPin[] = [
-    { id: 'cafeboda', latitude: 35.19010910, longitude: 128.904598, title: '카페보다', description: '고구려', team: '고구려', hours: '11:00 - 20:00' },
-    { id: 'manju', latitude: 37.5655, longitude: 126.9815, title: '만주점', description: '고구려', team: '고구려', hours: '11:00 - 20:00' },
-  ];
+  const { data: storesData } = useStores();
+
+  useEffect(() => {
+    if (!storesData) return;
+
+    const convertAddressesToPins = async () => {
+      const convertedPins: MapPin[] = [];
+
+      for (const store of storesData) {
+        const coords = await geocodeAddress(store.address);
+        if (coords) {
+          convertedPins.push({
+            id: store.store_id,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+            title: store.store_name,
+            description: store.store_type,
+            team: getTeamFromStoreType(store.store_type),
+            hours: '11:00 - 20:00',
+          });
+        }
+      }
+
+      setPins(convertedPins);
+    };
+
+    convertAddressesToPins();
+  }, [storesData]);
+
+  const getTeamFromStoreType = (storeType: string): string => {
+    const teamMap: Record<string, string> = {
+      'food': '고구려',
+      'drink': '신라',
+      'cafe': '백제',
+    };
+    return teamMap[storeType] || '고구려';
+  };
 
   return (
     <View style={{ flex: 1 }}>

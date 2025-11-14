@@ -23,3 +23,12 @@ export interface Coupon {
 export interface CouponsResponse {
   coupons: Coupon[];
 }
+
+export interface Store {
+  store_id: string;
+  store_name: string;
+  address: string;
+  store_type: 'food' | 'drink' | 'cafe';
+}
+
+export type StoresResponse = Store[];

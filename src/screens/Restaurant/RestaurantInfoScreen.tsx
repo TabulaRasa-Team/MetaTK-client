@@ -4,8 +4,9 @@ import styled from "styled-components/native";
 import { Ionicons } from "@expo/vector-icons";
 import BackButton from "../../components/common/BackButton";
 import { TYPOGRAPHY } from "../../constants/typography";
-import { useRoute, RouteProp } from "@react-navigation/native";
-import { RestaurantStackParamList } from "../../types/navigation";
+import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
+import type { NavigationProp } from "@react-navigation/native";
+import { RestaurantStackParamList, RootStackParamList } from "../../types/navigation";
 import { useStoreDetailedInfo } from "../../hooks/api/useStoreDetailedInfo";
 import { getTodayOperatingHours } from "../../utils/operatingHours";
 
@@ -13,6 +14,7 @@ type RestaurantInfoScreenRouteProp = RouteProp<RestaurantStackParamList, 'Restau
 
 export default function RestaurantInfoScreen() {
   const route = useRoute<RestaurantInfoScreenRouteProp>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const storeId = route.params?.storeId;
 
   const { data: storeInfo, isLoading } = useStoreDetailedInfo(storeId);
@@ -117,7 +119,7 @@ export default function RestaurantInfoScreen() {
       </ScrollView>
 
       <BottomBar>
-        <AskBtn>
+        <AskBtn onPress={() => navigation.navigate({ name: 'Restaurant', params: { screen: 'ChatBotScreen' } })}>
           <AskText>질문하기</AskText>
         </AskBtn>
       </BottomBar>

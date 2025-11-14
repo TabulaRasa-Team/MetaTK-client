@@ -85,7 +85,7 @@ export default function Map({ markers, mapRef, onMarkerPress }: { markers?: MapP
               primaryColor={getPinColor(m.team)}
             />
             {m.title && <IconText>{m.title}</IconText>}
-            {m.description && <IconSub>{m.description}</IconSub>}
+            {m.team && <IconSub>{m.team}</IconSub>}
           </MarkerContainer>
         </Marker>
       ))}

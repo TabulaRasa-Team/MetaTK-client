@@ -1,22 +1,29 @@
-import React, { useRef, useState, useEffect } from "react";
+import type { NavigationProp } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
-import Map, { MapPin } from "../../components/Map";
 import MapView from "react-native-maps";
-import SearchPanel from "../../components/SearchPanel";
 import MenuButton from "../../components/Menu/MenuButton";
 import MenuPopover from "../../components/Menu/MenuPopover";
-import { geocodeAddress } from "../../utils/geocode";
+import Map, { MapPin } from "../../components/Map";
+import SearchPanel from "../../components/SearchPanel";
 import StoreModal from "../../components/StoreModal";
-import { useNavigation } from "@react-navigation/native";
-import type { NavigationProp } from "@react-navigation/native";
-import type { RootStackParamList } from "../../types/navigation";
 import { useStores } from "../../hooks/api/useStores";
+import type { RootStackParamList } from "../../types/navigation";
+import { geocodeAddress } from "../../utils/geocode";
 
 export default function MainScreen() {
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected] = useState<MapPin | null>(null);
-  const [pins, setPins] = useState<MapPin[]>([]);
+  const [pins, setPins] = useState<MapPin[]>([
+    // 더미 데이터 - 테스트용
+    { id: 'dummy1', latitude: 36.3545812, longitude: 127.3687688, title: '카페보다', description: 'cafe', team: '백제', hours: '11:00 - 20:00' },
+    { id: 'dummy2', latitude: 35.19110910, longitude: 128.905598, title: '만주점', description: 'food', team: '고구려', hours: '11:00 - 20:00' },
+    { id: 'dummy3', latitude: 35.18910910, longitude: 128.906598, title: '신라바', description: 'drink', team: '신라', hours: '11:00 - 20:00' },
+    { id: 'dummy4', latitude: 35.19210910, longitude: 128.903598, title: '한양카페', description: 'cafe', team: '백제', hours: '11:00 - 20:00' },
+    { id: 'dummy5', latitude: 35.18810910, longitude: 128.907598, title: '척화비국수', description: 'food', team: '고구려', hours: '11:00 - 20:00' },
+  ]);
   const mapRef = useRef<MapView | null>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { data: storesData } = useStores();
@@ -36,7 +43,7 @@ export default function MainScreen() {
             longitude: coords.longitude,
             title: store.store_name,
             description: store.store_type,
-            team: getTeamFromStoreType(store.store_type),
+            team: store.team || getTeamFromStoreType(store.store_type),
             hours: '11:00 - 20:00',
           });
         }

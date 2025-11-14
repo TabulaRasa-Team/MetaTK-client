@@ -87,3 +87,31 @@ export interface OcrResponse {
   opening_date: string;
   parsed: boolean;
 }
+
+export interface StoreCreateRequest {
+  company_name: string;
+  bln: string;
+  owner_name: string;
+  address: string;
+  phone_number: string;
+  store_type: 'food' | 'drink' | 'cafe';
+  operating_hours: {
+    mon: [string, string];
+    tue: [string, string];
+    wed: [string, string];
+    thu: [string, string];
+    fri: [string, string];
+    sat: [string, string];
+    sun: [string, string];
+  };
+  menus: Array<{
+    name: string;
+    price: number;
+    image: string;
+  }>;
+  images: string[];
+}
+
+export interface StoreCreateResponse {
+  store_id: string;
+}

@@ -24,6 +24,7 @@ export default function OcrScreen() {
       name: 'Register',
       params: {
         screen: 'RegistMainInfoScreen',
+        params: {},
       },
     });
   }, []);

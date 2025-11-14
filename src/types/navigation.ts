@@ -15,10 +15,25 @@ export type RegisterStackParamList = {
     representativeName: string;
     openingDate: string;
   };
-  RegistMainInfoScreen: undefined;
-  RegistPictureInfoScreen: undefined;
-  RegistSubInfoScreen: undefined;
-  RegistCompleteScreen: undefined;
+  RegistMainInfoScreen: {
+    businessNumber?: string;
+    representativeName?: string;
+    openingDate?: string;
+  };
+  RegistPictureInfoScreen: {
+    businessNumber?: string;
+    representativeName?: string;
+    openingDate?: string;
+    address: string;
+    phone: string;
+    weeklyHours: { [key: string]: { start: string; end: string } };
+  };
+  RegistCompleteScreen: {
+    storeId: string;
+  };
+  RegistSubInfoScreen: {
+    storeId: string;
+  };
 };
 
 export type HomeStackParamList = {

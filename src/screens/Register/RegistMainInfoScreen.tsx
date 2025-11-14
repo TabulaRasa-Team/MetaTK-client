@@ -1,7 +1,7 @@
 import TitleSubtitle from "@/src/components/common/TitleSubtitle";
 import { Ionicons } from "@expo/vector-icons";
-import type { NavigationProp } from "@react-navigation/native";
-import { useNavigation } from "@react-navigation/native";
+import type { NavigationProp, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
 import { Modal, SafeAreaView } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -10,9 +10,11 @@ import styled from "styled-components/native";
 import BackButton from "../../components/common/BackButton";
 import Button from "../../components/ui/Button";
 import { TYPOGRAPHY } from "../../constants/typography";
-import type { RootStackParamList } from "../../types/navigation";
+import type { RootStackParamList, RegisterStackParamList } from "../../types/navigation";
 import { formatPhoneNumber, formatTime } from "../../utils/formatters";
 import { validateStoreInfo } from "../../utils/validators";
+
+type RegistMainInfoScreenRouteProp = RouteProp<RegisterStackParamList, 'RegistMainInfoScreen'>;
 
 type WeeklyHours = {
   [key: string]: { start: string; end: string };
@@ -23,6 +25,8 @@ const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
 export default function RegistMainInfoScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const route = useRoute<RegistMainInfoScreenRouteProp>();
+
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [weeklyHours, setWeeklyHours] = useState<WeeklyHours>(
@@ -54,7 +58,20 @@ export default function RegistMainInfoScreen() {
       return;
     }
 
-    navigation.navigate({ name: 'Register', params: { screen: 'RegistPictureInfoScreen' } });
+    navigation.navigate({
+      name: 'Register',
+      params: {
+        screen: 'RegistPictureInfoScreen',
+        params: {
+          businessNumber: route.params?.businessNumber,
+          representativeName: route.params?.representativeName,
+          openingDate: route.params?.openingDate,
+          address,
+          phone,
+          weeklyHours,
+        }
+      }
+    });
   };
 
   return (

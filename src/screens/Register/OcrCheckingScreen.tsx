@@ -56,7 +56,17 @@ export default function OcrCheckingScreen() {
 
   const handleModalConfirm = () => {
     setShowSuccessModal(false);
-    navigation.navigate({ name: 'Register', params: { screen: 'RegistMainInfoScreen' } });
+    navigation.navigate({
+      name: 'Register',
+      params: {
+        screen: 'RegistMainInfoScreen',
+        params: {
+          businessNumber,
+          representativeName: ceoName,
+          openingDate,
+        }
+      }
+    });
   };
 
   return (

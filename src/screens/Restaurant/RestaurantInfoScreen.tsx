@@ -1,13 +1,13 @@
-import React from "react";
-import { SafeAreaView, View, Image, ScrollView, ActivityIndicator } from "react-native";
-import styled from "styled-components/native";
 import { Ionicons } from "@expo/vector-icons";
+import type { NavigationProp } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import React from "react";
+import { ActivityIndicator, Image, SafeAreaView, ScrollView } from "react-native";
+import styled from "styled-components/native";
 import BackButton from "../../components/common/BackButton";
 import { TYPOGRAPHY } from "../../constants/typography";
-import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
-import type { NavigationProp } from "@react-navigation/native";
-import { RestaurantStackParamList, RootStackParamList } from "../../types/navigation";
 import { useStoreDetailedInfo } from "../../hooks/api/useStoreDetailedInfo";
+import { RestaurantStackParamList, RootStackParamList } from "../../types/navigation";
 import { getTodayOperatingHours } from "../../utils/operatingHours";
 
 type RestaurantInfoScreenRouteProp = RouteProp<RestaurantStackParamList, 'RestaurantInfoScreen'>;
@@ -119,7 +119,7 @@ export default function RestaurantInfoScreen() {
       </ScrollView>
 
       <BottomBar>
-        <AskBtn onPress={() => navigation.navigate({ name: 'Restaurant', params: { screen: 'ChatBotScreen' } })}>
+        <AskBtn onPress={() => navigation.navigate({ name: 'Restaurant', params: { screen: 'ChatBotScreen', params: { storeId } } })}>
           <AskText>질문하기</AskText>
         </AskBtn>
       </BottomBar>

@@ -58,7 +58,9 @@ export type RestaurantStackParamList = {
   RestaurantInfoScreen: {
     storeId?: string;
   };
-  ChatBotScreen: undefined;
+  ChatBotScreen: {
+    storeId?: string;
+  };
 };
 
 declare global {

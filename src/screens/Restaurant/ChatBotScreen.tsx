@@ -2,11 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import type { NavigationProp, RouteProp } from "@react-navigation/native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
-import { FlatList, KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
+import { FlatList, KeyboardAvoidingView, Platform, SafeAreaView, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import { TYPOGRAPHY } from "../../constants/typography";
 import type { RestaurantStackParamList, RootStackParamList } from "../../types/navigation";
+
+const API_URL = process.env.EXPO_PUBLIC_OCR_API_URL;
 
 type ChatBotScreenRouteProp = RouteProp<RestaurantStackParamList, 'ChatBotScreen'>;
 
@@ -21,6 +23,7 @@ export default function ChatBotScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const route = useRoute<ChatBotScreenRouteProp>();
   const insets = useSafeAreaInsets();
+  const storeId = route.params?.storeId;
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -68,20 +71,75 @@ export default function ChatBotScreen() {
   ]);
 
   const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = () => {
-    if (!inputText.trim()) return;
+  const sendQuestion = async (question: string) => {
+    if (!storeId) {
+      throw new Error('가게 정보를 찾을 수 없습니다.');
+    }
 
-    const newMessage: Message = {
+    try {
+      const response = await fetch(`${API_URL}/store/question`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          store_id: storeId,
+          question: question,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('API 요청 실패');
+      }
+
+      const data = await response.json();
+      return data.answer;
+    } catch (error) {
+      console.error('챗봇 API 에러:', error);
+      throw error;
+    }
+  };
+
+  const handleSend = async () => {
+    if (!inputText.trim() || isLoading) return;
+
+    const userMessage: Message = {
       id: Date.now().toString(),
       text: inputText,
       isUser: true,
       timestamp: '',
     };
 
-    setMessages([...messages, newMessage]);
+    const question = inputText;
+    setMessages(prev => [...prev, userMessage]);
     setInputText('');
+    setIsLoading(true);
 
+    try {
+      const answer = await sendQuestion(question);
+
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: answer,
+        isUser: false,
+        timestamp: '',
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: '죄송합니다. 답변을 가져오는데 실패했습니다. 다시 시도해주세요.',
+        isUser: false,
+        timestamp: '',
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const renderMessage = ({ item }: { item: Message }) => {
@@ -113,7 +171,7 @@ export default function ChatBotScreen() {
           <BackText>뒤로가기</BackText>
         </BackButton>
         <HeaderInfo>
-          <StoreName>주주언</StoreName>
+          <StoreName>주주원</StoreName>
           <PhoneNumber>전화번호 : 051-972-078</PhoneNumber>
         </HeaderInfo>
       </Header>
@@ -139,9 +197,14 @@ export default function ChatBotScreen() {
             placeholderTextColor="#8795a1"
             onSubmitEditing={handleSend}
             returnKeyType="send"
+            editable={!isLoading}
           />
-          <SendButton onPress={handleSend}>
-            <Ionicons name="send" size={24} color="#36DBFF" />
+          <SendButton onPress={handleSend} disabled={isLoading}>
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#36DBFF" />
+            ) : (
+              <Ionicons name="send" size={24} color="#36DBFF" />
+            )}
           </SendButton>
         </InputContainer>
       </KeyboardAvoidingView>

@@ -18,6 +18,16 @@ export default function OcrScreen() {
   const [isBusy, setIsBusy] = useState(false);
   const cameraRef = useRef<CameraView>(null);
 
+  // 임시: OCR 건너뛰기 - RegistMainInfoScreen으로 바로 이동
+  useEffect(() => {
+    navigation.navigate({
+      name: 'Register',
+      params: {
+        screen: 'RegistMainInfoScreen',
+      },
+    });
+  }, []);
+
   useEffect(() => {
     if (!permission?.granted) requestPermission();
   }, [permission]);

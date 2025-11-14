@@ -2,10 +2,14 @@ import React from 'react';
 import { TouchableOpacity } from 'react-native';
 
 import PinSvg from './Icons/Pin';
+import CafePinSvg from './Icons/CafePin';
+import FoodPinSvg from './Icons/FoodPin';
 import MenuSvg from './Icons/Menu';
 
 const icons = {
   pin: PinSvg,
+  cafePin: CafePinSvg,
+  foodPin: FoodPinSvg,
   menu: MenuSvg,
 };
 
@@ -18,6 +22,7 @@ interface Props {
     height?: number;
     color?: string;
     fill?: string;
+    primaryColor?: string;
     isPress?: boolean;
     onPress?: () => void;
 }

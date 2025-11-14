@@ -1,5 +1,6 @@
 import React from "react";
-import { SafeAreaView, View } from "react-native";
+import { View, ActivityIndicator } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import QRCode from "react-native-qrcode-svg";
 import BackButton from "../../components/common/BackButton";
@@ -7,12 +8,78 @@ import { useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import type { CouponStackParamList } from "../../types/navigation";
 import { TYPOGRAPHY } from "../../constants/typography";
+import { useCouponDetail } from "../../hooks/api/useCouponDetail";
 
 type Route = RouteProp<CouponStackParamList, 'CouponDetailedScreen'>;
 
 export default function CouponDetailedScreen() {
   const { params } = useRoute<Route>();
-  const { name, category, expires, address, qrValue } = params;
+  const couponId = params.id;
+
+  const { data: couponDetail, isLoading } = useCouponDetail(couponId);
+
+  // 더미 데이터 맵
+  const dummyCouponDetails: Record<string, any> = {
+    'dummy-coupon-1': {
+      coupon_id: 'dummy-coupon-1',
+      coupon_name: '1000원 할인 쿠폰',
+      store_name: '카페보다',
+      expiration: '2025-12-31',
+      store_type: 'cafe',
+    },
+    'dummy-coupon-2': {
+      coupon_id: 'dummy-coupon-2',
+      coupon_name: '2000원 할인 쿠폰',
+      store_name: '만주점',
+      expiration: '2025-11-20',
+      store_type: 'food',
+    },
+    'dummy-coupon-3': {
+      coupon_id: 'dummy-coupon-3',
+      coupon_name: '1500원 할인 쿠폰',
+      store_name: '신라바',
+      expiration: '2025-11-18',
+      store_type: 'drink',
+    },
+    'dummy-coupon-4': {
+      coupon_id: 'dummy-coupon-4',
+      coupon_name: '3000원 할인 쿠폰',
+      store_name: '한양카페',
+      expiration: '2026-01-15',
+      store_type: 'cafe',
+    },
+    'dummy-coupon-5': {
+      coupon_id: 'dummy-coupon-5',
+      coupon_name: '1000원 할인 쿠폰',
+      store_name: '척화비국수',
+      expiration: '2025-10-30',
+      store_type: 'food',
+    },
+  };
+
+  // API 데이터가 없으면 더미 데이터 사용
+  const displayCoupon = couponDetail || dummyCouponDetails[couponId];
+
+  if (isLoading) {
+    return (
+      <Container>
+        <LoadingContainer>
+          <ActivityIndicator size="large" color="#36DBFF" />
+          <LoadingText>쿠폰 정보를 불러오는 중...</LoadingText>
+        </LoadingContainer>
+      </Container>
+    );
+  }
+
+  if (!displayCoupon) {
+    return (
+      <Container>
+        <LoadingContainer>
+          <LoadingText>쿠폰 정보를 찾을 수 없습니다.</LoadingText>
+        </LoadingContainer>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -24,13 +91,13 @@ export default function CouponDetailedScreen() {
         <View style={{ gap: 12 }}>
           <QRWrap>
             <QRCode
-              value={qrValue}
+              value={displayCoupon.coupon_id}
               size={260}
               backgroundColor="transparent"
               color="#62D0FF"
             />
           </QRWrap>
-          <Title>{`${name} *1000원* 할인권`}</Title>
+          <Title>{`${displayCoupon.coupon_name} *1000원* 할인권`}</Title>
           <Desc>아래에서 쿠폰을 사용할 수 있는 매장 정보를 확인해보세요</Desc>
         </View>
 
@@ -38,15 +105,15 @@ export default function CouponDetailedScreen() {
           <SectionTitle>가게 정보</SectionTitle>
           <InfoRow>
             <InfoKey>가게명 :</InfoKey>
-            <InfoValue>{name}</InfoValue>
+            <InfoValue>{displayCoupon.store_name}</InfoValue>
           </InfoRow>
           <InfoRow>
               <InfoKey>주소 :</InfoKey>
-              <InfoValue>{address ? address : '부산광역시 강서구 죽림동 1061번지 2층'}</InfoValue>
+              <InfoValue>부산광역시 강서구 죽림동 1061번지 2층</InfoValue>
             </InfoRow>
           <InfoRow>
             <InfoKey>유효기간 :</InfoKey>
-            <InfoValue>~ {expires} 까지</InfoValue>
+            <InfoValue>~ {displayCoupon.expiration} 까지</InfoValue>
           </InfoRow>
         </View>
 
@@ -125,4 +192,16 @@ const ExpandBtn = styled.Pressable`
 const ExpandText = styled.Text`
   color: #e6f1f7;
   ${TYPOGRAPHY.SECTION_1}
+`;
+
+const LoadingContainer = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+`;
+
+const LoadingText = styled.Text`
+  color: #97C3DC;
+  font-size: 14px;
 `;

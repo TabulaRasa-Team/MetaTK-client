@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { View, ScrollView, SafeAreaView, ActivityIndicator, Text } from "react-native";
+import { View, ScrollView, ActivityIndicator } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import { Ionicons } from "@expo/vector-icons";
 import TitleSubtitle from "../../components/common/TitleSubtitle";
@@ -18,6 +19,45 @@ export default function CouponListScreen() {
   const [sortType, setSortType] = useState<SortType>('latest');
   const [showSortMenu, setShowSortMenu] = useState(false);
 
+  // 더미 데이터
+  const dummyCoupons = [
+    {
+      coupon_id: 'dummy-coupon-1',
+      coupon_name: '1000원 할인 쿠폰',
+      store_name: '카페보다',
+      expiration: '2025-12-31',
+      store_type: 'cafe' as const,
+    },
+    {
+      coupon_id: 'dummy-coupon-2',
+      coupon_name: '2000원 할인 쿠폰',
+      store_name: '만주점',
+      expiration: '2025-11-20',
+      store_type: 'food' as const,
+    },
+    {
+      coupon_id: 'dummy-coupon-3',
+      coupon_name: '1500원 할인 쿠폰',
+      store_name: '신라바',
+      expiration: '2025-11-18',
+      store_type: 'bar' as const,
+    },
+    {
+      coupon_id: 'dummy-coupon-4',
+      coupon_name: '3000원 할인 쿠폰',
+      store_name: '한양카페',
+      expiration: '2026-01-15',
+      store_type: 'cafe' as const,
+    },
+    {
+      coupon_id: 'dummy-coupon-5',
+      coupon_name: '1000원 할인 쿠폰',
+      store_name: '척화비국수',
+      expiration: '2025-10-30',
+      store_type: 'food' as const,
+    },
+  ];
+
   const apiSortType: CouponSortType = useMemo(() => {
     switch (sortType) {
       case 'latest': return 'recent';
@@ -26,7 +66,12 @@ export default function CouponListScreen() {
     }
   }, [sortType]);
 
-  const { data: couponsData, isLoading, error } = useCoupons(apiSortType);
+  const { data: couponsData, isLoading } = useCoupons(apiSortType);
+
+  // API 데이터가 없거나 에러가 발생하면 더미 데이터 사용
+  const displayCoupons = (couponsData?.coupons && couponsData.coupons.length > 0)
+    ? couponsData.coupons
+    : dummyCoupons;
 
   const getCouponStatus = (expiration: string): 'available' | 'expired' | 'used' => {
     const expirationDate = new Date(expiration);
@@ -114,27 +159,19 @@ export default function CouponListScreen() {
           )}
         </SortContainer>
 
-        {isLoading && (
+        {isLoading ? (
           <LoadingContainer>
             <ActivityIndicator size="large" color="#36DBFF" />
             <LoadingText>쿠폰을 불러오는 중...</LoadingText>
           </LoadingContainer>
-        )}
-
-        {error && (
-          <ErrorContainer>
-            <ErrorText>쿠폰을 불러오는데 실패했습니다.</ErrorText>
-          </ErrorContainer>
-        )}
-
-        {!isLoading && !error && couponsData && (
+        ) : (
           <View style={{ gap: 16 }}>
-            {couponsData.coupons.length === 0 ? (
+            {displayCoupons.length === 0 ? (
               <EmptyContainer>
                 <EmptyText>보유한 쿠폰이 없습니다.</EmptyText>
               </EmptyContainer>
             ) : (
-              couponsData.coupons.map((coupon, idx) => (
+              displayCoupons.map((coupon, idx) => (
                 <CouponItem
                   key={`${coupon.coupon_id}-${idx}`}
                   category={getStoreTypeLabel(coupon.store_type)}
@@ -230,17 +267,6 @@ const LoadingContainer = styled.View`
 const LoadingText = styled.Text`
   color: #97C3DC;
   font-size: 14px;
-`;
-
-const ErrorContainer = styled.View`
-  padding: 40px 20px;
-  align-items: center;
-`;
-
-const ErrorText = styled.Text`
-  color: #FF6B6B;
-  font-size: 14px;
-  text-align: center;
 `;
 
 const EmptyContainer = styled.View`

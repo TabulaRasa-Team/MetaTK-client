@@ -24,6 +24,14 @@ export interface CouponsResponse {
   coupons: Coupon[];
 }
 
+export interface CouponDetail {
+  coupon_id: string;
+  coupon_name: string;
+  store_name: string;
+  expiration: string;
+  store_type: 'cafe' | 'food' | 'drink';
+}
+
 export interface Store {
   store_id: string;
   store_name: string;

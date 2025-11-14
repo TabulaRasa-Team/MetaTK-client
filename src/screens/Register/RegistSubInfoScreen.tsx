@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import styled from "styled-components/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import TitleSubtitle from "@/src/components/common/TitleSubtitle";
@@ -15,34 +16,41 @@ export default function RegistSubInfoScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [desc, setDesc] = useState("");
 
-  return (  
+  return (
     <Container>
-      <BackButton style={{ paddingBottom: insets.bottom + 16 }} />
-      <TitleSubtitle
-        title="가게 정보를 입력해주세요."
-        subtitle="이 정보는 나중에 바꿀 수 있어요."
-        style={{ marginBottom: 48, marginLeft: 12 }}
-      />
-
-      <Section>
-        <Label>사람들이 궁금해 할 내용을 작성해 주세요.</Label>
-        <TextArea
-          multiline
-          value={desc}
-          onChangeText={setDesc}
-          placeholder="가게 소개, 주요 메뉴, 주차/휴무 안내 등"
-          placeholderTextColor="#8795a1"
-          textAlignVertical="top"
+      <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        enableOnAndroid
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
+      >
+        <BackButton style={{ paddingBottom: insets.bottom + 16 }} />
+        <TitleSubtitle
+          title="가게 정보를 입력해주세요."
+          subtitle="이 정보는 나중에 바꿀 수 있어요."
+          style={{ marginBottom: 48, marginLeft: 12 }}
         />
-      </Section>
 
-      <Buttons style={{ paddingBottom: insets.bottom + 16 }}>
-        <Button
-          title="다음으로"
-          variant="primary"
-          onPress={() => navigation.navigate({ name: 'Register', params: { screen: 'RegistCompleteScreen' } })}
-        />
-      </Buttons>
+        <Section>
+          <Label>사람들이 궁금해 할 내용을 작성해 주세요.</Label>
+          <TextArea
+            multiline
+            value={desc}
+            onChangeText={setDesc}
+            placeholder="가게 소개, 주요 메뉴, 주차/휴무 안내 등"
+            placeholderTextColor="#8795a1"
+            textAlignVertical="top"
+          />
+        </Section>
+
+        <Buttons style={{ paddingBottom: insets.bottom + 16 }}>
+          <Button
+            title="다음으로"
+            variant="primary"
+            onPress={() => navigation.navigate({ name: 'Register', params: { screen: 'RegistCompleteScreen' } })}
+          />
+        </Buttons>
+      </KeyboardAwareScrollView>
     </Container>
   );
 }

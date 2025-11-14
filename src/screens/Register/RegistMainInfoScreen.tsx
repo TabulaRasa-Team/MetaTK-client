@@ -1,13 +1,14 @@
+import TitleSubtitle from "@/src/components/common/TitleSubtitle";
+import type { NavigationProp } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
-import styled from "styled-components/native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import styled from "styled-components/native";
 import BackButton from "../../components/common/BackButton";
-import { TYPOGRAPHY } from "../../constants/typography";
 import Button from "../../components/ui/Button";
-import TitleSubtitle from "@/src/components/common/TitleSubtitle";
-import { useNavigation } from "@react-navigation/native";
-import type { NavigationProp } from "@react-navigation/native";
+import { TYPOGRAPHY } from "../../constants/typography";
 import type { RootStackParamList } from "../../types/navigation";
 
 export default function RegistMainInfoScreen() {
@@ -19,44 +20,51 @@ export default function RegistMainInfoScreen() {
 
   return (
     <Container style={{ paddingBottom: insets.bottom + 16 }}>
-      <BackButton style={{ marginBottom: 8 }} />
-      <TitleSubtitle title="가게 정보를 입력해주세요." subtitle="이 정보는 나중에 바꿀 수 있어요." style={{ marginBottom: 48, marginLeft: 12}} />
+      <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        enableOnAndroid
+        enableAutomaticScroll={true}
+        keyboardShouldPersistTaps="handled"
+      >
+        <BackButton style={{ marginBottom: 8 }} />
+        <TitleSubtitle title="가게 정보를 입력해주세요." subtitle="이 정보는 나중에 바꿀 수 있어요." style={{ marginBottom: 48, marginLeft: 12}} />
 
-      <Form>
-        <Label>주소</Label>
-        <Input
-          placeholder="부산광역시 강서구 가락대로 1393"
-          placeholderTextColor="#8795a1"
-          value={address}
-          onChangeText={setAddress}
-        />
+        <Form>
+          <Label>주소</Label>
+          <Input
+            placeholder="부산광역시 강서구 가락대로 1393"
+            placeholderTextColor="#8795a1"
+            value={address}
+            onChangeText={setAddress}
+          />
 
-        <Label>전화번호</Label>
-        <Input
-          placeholder="010-0326-0326"
-          placeholderTextColor="#8795a1"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-        />
+          <Label>전화번호</Label>
+          <Input
+            placeholder="010-0326-0326"
+            placeholderTextColor="#8795a1"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+          />
 
-        <Label>영업시간</Label>
-        <Input
-          placeholder="22:00 ~ 23:00"
-          placeholderTextColor="#8795a1"
-          value={hours}
-          onChangeText={setHours}
-        />
-      </Form>
+          <Label>영업시간</Label>
+          <Input
+            placeholder="22:00 ~ 23:00"
+            placeholderTextColor="#8795a1"
+            value={hours}
+            onChangeText={setHours}
+          />
+        </Form>
 
-      <Buttons>
-         <Button
-           title="다음으로"
-           variant="primary"
-           style={{ padding: '0 24px' }}
-           onPress={() => navigation.navigate({ name: 'Register', params: { screen: 'RegistPictureInfoScreen' } })}
-         />
-      </Buttons>
+        <Buttons>
+           <Button
+             title="다음으로"
+             variant="primary"
+             style={{ padding: '0 24px' }}
+             onPress={() => navigation.navigate({ name: 'Register', params: { screen: 'RegistPictureInfoScreen' } })}
+           />
+        </Buttons>
+      </KeyboardAwareScrollView>
     </Container>
   );
 } 

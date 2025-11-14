@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { SafeAreaView, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import styled from "styled-components/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TYPOGRAPHY } from "../../constants/typography";
@@ -23,23 +24,30 @@ export default function OcrCheckingScreen() {
 
   return (
     <Container style={{ paddingBottom: insets.bottom + 16 }}>
-      <BackButton style={{ marginBottom: 8 }} />
-      <TitleSubtitle title="이 정보가 확실한가요?" subtitle="해당 정보는 나중에 수정할 수 없어요." style={{ marginBottom: 48, marginLeft: 12 }} />
+      <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        enableOnAndroid
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
+      >
+        <BackButton style={{ marginBottom: 8 }} />
+        <TitleSubtitle title="이 정보가 확실한가요?" subtitle="해당 정보는 나중에 수정할 수 없어요." style={{ marginBottom: 48, marginLeft: 12 }} />
 
-      <Form>
-        <Label>개업 날짜</Label>
-        <Input value={openingDate} onChangeText={setOpeningDate} placeholder="20250813" placeholderTextColor="#8795a1" />
+        <Form>
+          <Label>개업 날짜</Label>
+          <Input value={openingDate} onChangeText={setOpeningDate} placeholder="20250813" placeholderTextColor="#8795a1" />
 
-        <Label>사업자등록번호</Label>
-        <Input value={businessNumber} onChangeText={setBusinessNumber} placeholder="000000-0000000" placeholderTextColor="#8795a1" />
+          <Label>사업자등록번호</Label>
+          <Input value={businessNumber} onChangeText={setBusinessNumber} placeholder="000000-0000000" placeholderTextColor="#8795a1" />
 
-        <Label>대표자명</Label>
-        <Input value={ceoName} onChangeText={setCeoName} placeholder="홍길동" placeholderTextColor="#8795a1" />
-      </Form>
-      <Buttons>
-        <Button title="다시 촬영하기" variant="secondary" onPress={() => navigation.navigate({ name: 'Register', params: { screen: 'OcrScreen' } })} />
-        <Button title="다음으로" variant="primary" onPress={() => navigation.navigate({ name: 'Register', params: { screen: 'RegistMainInfoScreen' } })} />
-      </Buttons>
+          <Label>대표자명</Label>
+          <Input value={ceoName} onChangeText={setCeoName} placeholder="홍길동" placeholderTextColor="#8795a1" />
+        </Form>
+        <Buttons>
+          <Button title="다시 촬영하기" variant="secondary" onPress={() => navigation.navigate({ name: 'Register', params: { screen: 'OcrScreen' } })} />
+          <Button title="다음으로" variant="primary" onPress={() => navigation.navigate({ name: 'Register', params: { screen: 'RegistMainInfoScreen' } })} />
+        </Buttons>
+      </KeyboardAwareScrollView>
     </Container>
   );
 }

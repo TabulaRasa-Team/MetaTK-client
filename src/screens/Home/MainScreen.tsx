@@ -11,7 +11,6 @@ import StoreModal from "../../components/StoreModal";
 import { useStores } from "../../hooks/api/useStores";
 import type { RootStackParamList } from "../../types/navigation";
 import { geocodeAddress } from "../../utils/geocode";
-import { storeApi } from "../../utils/api";
 import { getTeamFromRatio } from "../../utils/teamFromRatio";
 
 export default function MainScreen() {
@@ -37,12 +36,13 @@ export default function MainScreen() {
       const convertedPins: MapPin[] = [];
 
       for (const store of storesData) {
-        const coords = await geocodeAddress(store.address);
-        if (coords) {
-          try {
-            // 각 가게의 상세 정보를 가져와서 ratio 기반으로 팀 결정
-            const storeDetail = await storeApi.getStoreDetail(store.store_id);
-            const team = getTeamFromRatio(storeDetail.ratio);
+        try {
+          // 주소를 위도/경도로 변환
+          const coords = await geocodeAddress(store.address);
+
+          if (coords) {
+            // API 응답에 포함된 ratio로 팀 결정
+            const team = getTeamFromRatio(store.ratio);
 
             convertedPins.push({
               id: store.store_id,
@@ -53,19 +53,11 @@ export default function MainScreen() {
               team: team,
               hours: '11:00 - 20:00',
             });
-          } catch (error) {
-            console.error(`Failed to fetch store detail for ${store.store_id}:`, error);
-            // 에러 발생 시 기본값으로 '미점령' 사용
-            convertedPins.push({
-              id: store.store_id,
-              latitude: coords.latitude,
-              longitude: coords.longitude,
-              title: store.store_name,
-              description: store.store_type,
-              team: '미점령',
-              hours: '11:00 - 20:00',
-            });
+          } else {
+            console.warn(`Failed to geocode address for ${store.store_name}: ${store.address}`);
           }
+        } catch (error) {
+          console.error(`Error processing store ${store.store_id}:`, error);
         }
       }
 

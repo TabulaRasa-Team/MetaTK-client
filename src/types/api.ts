@@ -37,6 +37,7 @@ export interface Store {
   store_name: string;
   address: string;
   store_type: 'food' | 'drink' | 'cafe';
+  ratio: StoreRatio;
   team?: string;
 }
 

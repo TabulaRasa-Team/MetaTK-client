@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View, Alert, ActivityIndicator } from "react-native";
-import styled from "styled-components/native";
+import { Ionicons } from "@expo/vector-icons";
+import type { NavigationProp } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import type { NavigationProp } from "@react-navigation/native";
-import type { RootStackParamList } from "../../types/navigation";
+import React, { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import styled from "styled-components/native";
 import { TYPOGRAPHY } from "../../constants/typography";
+import type { RootStackParamList } from "../../types/navigation";
 import { ocrApi } from "../../utils/api/ocr";
 
 export default function OcrScreen() {
@@ -18,17 +18,6 @@ export default function OcrScreen() {
   const [isBusy, setIsBusy] = useState(false);
   const cameraRef = useRef<CameraView>(null);
 
-  // 임시: OCR 건너뛰기 - RegistMainInfoScreen으로 바로 이동
-  useEffect(() => {
-    navigation.navigate({
-      name: 'Register',
-      params: {
-        screen: 'RegistMainInfoScreen',
-        params: {},
-      },
-    });
-  }, []);
-
   useEffect(() => {
     if (!permission?.granted) requestPermission();
   }, [permission]);
@@ -36,11 +25,8 @@ export default function OcrScreen() {
   const processOcrImage = async (imageUri: string) => {
     try {
       setIsBusy(true);
-
-      // OCR API 호출
       const ocrResult = await ocrApi.uploadImage(imageUri);
 
-      // OcrCheckingScreen으로 이동하며 데이터 전달
       navigation.navigate({
         name: 'Register',
         params: {
@@ -65,7 +51,6 @@ export default function OcrScreen() {
     if (isBusy || !cameraRef.current) return;
 
     try {
-      // 사진 촬영
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.8,
       });

@@ -55,3 +55,19 @@ export interface StoreDetail {
   operating_hours: OperatingHours;
   ratio: StoreRatio;
 }
+
+export interface Menu {
+  image: string;
+  name: string;
+  price: number;
+}
+
+export interface StoreDetailedInfo {
+  store_name: string;
+  address: string;
+  phone_number: string;
+  operating_hours: OperatingHours;
+  menus: Menu[];
+  images: string[];
+  ratio: StoreRatio;
+}

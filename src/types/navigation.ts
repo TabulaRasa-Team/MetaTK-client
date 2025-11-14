@@ -35,7 +35,9 @@ export type CouponStackParamList = {
 };
 
 export type RestaurantStackParamList = {
-  RestaurantInfoScreen: undefined;
+  RestaurantInfoScreen: {
+    storeId?: string;
+  };
   ChatBotScreen: undefined;
 };
 

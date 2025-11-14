@@ -114,7 +114,13 @@ export default function MainScreen() {
         hours={selected?.hours}
         onPressInfo={() => {
           setSelected(null);
-          navigation.navigate({ name: 'Restaurant', params: { screen: 'RestaurantInfoScreen' } });
+          navigation.navigate({
+            name: 'Restaurant',
+            params: {
+              screen: 'RestaurantInfoScreen',
+              params: { storeId: selected?.id }
+            }
+          });
         }}
         onPressConquer={() => {}}
       />

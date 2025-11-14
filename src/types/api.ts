@@ -33,3 +33,25 @@ export interface Store {
 }
 
 export type StoresResponse = Store[];
+
+export interface OperatingHours {
+  mon: string[];
+  tue: string[];
+  wed: string[];
+  thu: string[];
+  fri: string[];
+  sat: string[];
+  sun: string[];
+}
+
+export interface StoreRatio {
+  baekjae_ratio: number;
+  shinla_ratio: number;
+  goguryeo_ratio: number;
+}
+
+export interface StoreDetail {
+  store_name: string;
+  operating_hours: OperatingHours;
+  ratio: StoreRatio;
+}

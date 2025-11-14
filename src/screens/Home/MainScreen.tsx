@@ -108,6 +108,7 @@ export default function MainScreen() {
       <StoreModal
         visible={!!selected}
         onClose={() => setSelected(null)}
+        storeId={selected?.id}
         title={selected?.title}
         team={selected?.team ?? selected?.description}
         hours={selected?.hours}

@@ -1,7 +1,9 @@
-import React from "react";
-import { Modal, View } from "react-native";
+import React, { useMemo } from "react";
+import { ActivityIndicator, Modal, View } from "react-native";
 import styled from "styled-components/native";
 import { TYPOGRAPHY } from "../constants/typography";
+import { useStoreDetail } from "../hooks/api/useStoreDetail";
+import { getTodayOperatingHours } from "../utils/operatingHours";
 import Button from "./ui/Button";
 
 type Shares = { a: number; b: number; c: number };
@@ -9,6 +11,7 @@ type Shares = { a: number; b: number; c: number };
 type Props = {
   visible: boolean;
   onClose: () => void;
+  storeId?: string;
   title?: string;
   team?: string;
   hours?: string;
@@ -20,6 +23,7 @@ type Props = {
 export default function StoreModal({
   visible,
   onClose,
+  storeId,
   title,
   team,
   hours,
@@ -27,40 +31,79 @@ export default function StoreModal({
   onPressInfo,
   onPressConquer,
 }: Props) {
+  const { data: storeDetail, isLoading } = useStoreDetail(visible ? storeId || null : null);
+
+  const displayTitle = storeDetail?.store_name || title || '';
+  const displayHours = storeDetail ? getTodayOperatingHours(storeDetail.operating_hours) : hours;
+
+  const ratioData = useMemo(() => {
+    if (storeDetail?.ratio) {
+      return {
+        goguryeo: storeDetail.ratio.goguryeo_ratio,
+        baekjae: storeDetail.ratio.baekjae_ratio,
+        shinla: storeDetail.ratio.shinla_ratio,
+      };
+    }
+    return { goguryeo: shares.a, baekjae: shares.b, shinla: shares.c };
+  }, [storeDetail, shares]);
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Overlay onPress={onClose}>
         <Card pointerEvents="box-none">
           <HeaderRow>
-            <TitleText>{title ?? ''}</TitleText>
+            <TitleText>{displayTitle}</TitleText>
             <CloseButton onPress={onClose}>
               <CloseText>×</CloseText>
             </CloseButton>
           </HeaderRow>
-          <View>
-            {team ? <BodyText>현재 점령국 : {team}</BodyText> : null}
-            {hours ? (
-              <BodyText style={{ marginTop: 12 }}>
-                영업시간: {hours}
-              </BodyText>
-            ) : null}
-          </View>
 
-          <BarWrap>
-            <BarSegment style={{ flex: shares.a, backgroundColor: 'rgba(195, 122, 43, 0.40)' }}>
-              <BarLabel>38%</BarLabel>
-            </BarSegment>
-            <BarSegment style={{ flex: shares.b, backgroundColor: 'rgba(39, 55, 193, 0.40)' }}>
-              <BarLabel>34%</BarLabel>
-            </BarSegment>
-            <BarSegment style={{ flex: shares.c, backgroundColor: 'rgba(146, 47, 51, 0.40)' }}>
-              <BarLabel>28%</BarLabel>
-            </BarSegment>
-          </BarWrap>
-          <View>
-            <Button title="가게 정보 보기" onPress={onPressInfo} variant="primary" />
-            <Button title="점령하기" onPress={onPressConquer} variant="secondary" />
-          </View>
+          {isLoading ? (
+            <LoadingContainer>
+              <ActivityIndicator size="small" color="#36DBFF" />
+            </LoadingContainer>
+          ) : (
+            <>
+              <View>
+                {team ? <BodyText>현재 점령국 : {team}</BodyText> : null}
+                {displayHours ? (
+                  <BodyText style={{ marginTop: 12 }}>
+                    영업시간: {displayHours}
+                  </BodyText>
+                ) : null}
+              </View>
+
+              <BarWrap>
+                <BarSegment
+                  style={{
+                    flex: ratioData.goguryeo,
+                    backgroundColor: 'rgba(199, 52, 52, 0.40)',
+                  }}
+                >
+                  <BarLabel>{ratioData.goguryeo.toFixed(1)}%</BarLabel>
+                </BarSegment>
+                <BarSegment
+                  style={{
+                    flex: ratioData.baekjae,
+                    backgroundColor: 'rgba(45, 62, 255, 0.40)',
+                  }}
+                >
+                  <BarLabel>{ratioData.baekjae.toFixed(1)}%</BarLabel>
+                </BarSegment>
+                <BarSegment
+                  style={{
+                    flex: ratioData.shinla,
+                    backgroundColor: 'rgba(255, 153, 45, 0.40)',
+                  }}
+                >
+                  <BarLabel>{ratioData.shinla.toFixed(1)}%</BarLabel>
+                </BarSegment>
+              </BarWrap>
+              <View>
+                <Button title="가게 정보 보기" onPress={onPressInfo} variant="primary" />
+                <Button title="점령하기" onPress={onPressConquer} variant="secondary" />
+              </View>
+            </>
+          )}
         </Card>
       </Overlay>
     </Modal>
@@ -133,6 +176,9 @@ const BarLabel = styled.Text`
   ${TYPOGRAPHY.DOCS_1}
 `;
 
-// 버튼 스타일은 ui/PrimaryButton, ui/SecondaryButton으로 분리되었습니다.
-
+const LoadingContainer = styled.View`
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
+`;
 

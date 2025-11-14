@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, ScrollView, SafeAreaView } from "react-native";
+import React, { useState, useMemo } from "react";
+import { View, ScrollView, SafeAreaView, ActivityIndicator, Text } from "react-native";
 import styled from "styled-components/native";
 import { Ionicons } from "@expo/vector-icons";
 import TitleSubtitle from "../../components/common/TitleSubtitle";
@@ -8,6 +8,8 @@ import BackButton from "../../components/common/BackButton";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { CouponStackParamList } from "../../types/navigation";
+import { useCoupons } from "../../hooks/api/useCoupons";
+import type { CouponSortType } from "../../types/api";
 
 type SortType = 'latest' | 'oldest' | 'expiring';
 
@@ -16,13 +18,35 @@ export default function CouponListScreen() {
   const [sortType, setSortType] = useState<SortType>('latest');
   const [showSortMenu, setShowSortMenu] = useState(false);
 
-  const coupons = [
-    { id: 'coupon1', category: '음식점', name: '주주원', expireText: '~ 2025.12.25', status: 'available' as const, address: '부산광역시 강서구 죽림동 1061번지 2층' },
-    { id: 'coupon2', category: '음식점', name: '서정헌', expireText: '~ 2025.09.26', status: 'expired' as const },
-    { id: 'coupon3', category: '카페', name: '권민재', expireText: '~ 2025.12.09', status: 'used' as const },
-    { id: 'coupon4', category: '호프바', name: '박가온', expireText: '~ 2025.12.09', status: 'available' as const },
-    { id: 'coupon5', category: '카페', name: '권민재', expireText: '~ 2025.12.09', status: 'available' as const },
-  ];
+  const apiSortType: CouponSortType = useMemo(() => {
+    switch (sortType) {
+      case 'latest': return 'recent';
+      case 'oldest': return 'old';
+      case 'expiring': return 'expiration';
+    }
+  }, [sortType]);
+
+  const { data: couponsData, isLoading, error } = useCoupons(apiSortType);
+
+  const getCouponStatus = (expiration: string): 'available' | 'expired' | 'used' => {
+    const expirationDate = new Date(expiration);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (expirationDate < today) {
+      return 'expired';
+    }
+    return 'available';
+  };
+
+  const getStoreTypeLabel = (storeType: string): string => {
+    const typeMap: Record<string, string> = {
+      'food': '음식점',
+      'cafe': '카페',
+      'bar': '호프바',
+    };
+    return typeMap[storeType] || storeType;
+  };
 
   const getSortLabel = (type: SortType) => {
     switch (type) {
@@ -90,25 +114,46 @@ export default function CouponListScreen() {
           )}
         </SortContainer>
 
-        <View style={{ gap: 16 }}>
-          {coupons.map((c, idx) => (
-            <CouponItem
-              key={`${c.name}-${idx}`}
-              category={c.category}
-              name={c.name}
-              expireText={c.expireText}
-              status={c.status}
-              onPress={() => navigation.navigate('CouponDetailedScreen', {
-                id: c.id,
-                name: c.name,
-                category: c.category,
-                expires: c.expireText.replace('~ ', ''),
-                address: c.address,
-                qrValue: JSON.stringify({ id: c.id, name: c.name })
-              })}
-            />
-          ))}
-        </View>
+        {isLoading && (
+          <LoadingContainer>
+            <ActivityIndicator size="large" color="#36DBFF" />
+            <LoadingText>쿠폰을 불러오는 중...</LoadingText>
+          </LoadingContainer>
+        )}
+
+        {error && (
+          <ErrorContainer>
+            <ErrorText>쿠폰을 불러오는데 실패했습니다.</ErrorText>
+          </ErrorContainer>
+        )}
+
+        {!isLoading && !error && couponsData && (
+          <View style={{ gap: 16 }}>
+            {couponsData.coupons.length === 0 ? (
+              <EmptyContainer>
+                <EmptyText>보유한 쿠폰이 없습니다.</EmptyText>
+              </EmptyContainer>
+            ) : (
+              couponsData.coupons.map((coupon, idx) => (
+                <CouponItem
+                  key={`${coupon.coupon_id}-${idx}`}
+                  category={getStoreTypeLabel(coupon.store_type)}
+                  name={coupon.store_name}
+                  expireText={`~ ${coupon.expiration}`}
+                  status={getCouponStatus(coupon.expiration)}
+                  onPress={() => navigation.navigate('CouponDetailedScreen', {
+                    id: coupon.coupon_id,
+                    name: coupon.store_name,
+                    category: getStoreTypeLabel(coupon.store_type),
+                    expires: coupon.expiration,
+                    address: '',
+                    qrValue: JSON.stringify({ id: coupon.coupon_id, name: coupon.coupon_name })
+                  })}
+                />
+              ))
+            )}
+          </View>
+        )}
         
       </ScrollView>
     </Container>
@@ -174,4 +219,37 @@ const SortOptionText = styled.Text<{ $isSelected: boolean }>`
   color: ${({ $isSelected }: { $isSelected: boolean }) => $isSelected ? '#36DBFF' : '#97C3DC'};
   font-size: 14px;
   flex: 1;
+`;
+
+const LoadingContainer = styled.View`
+  padding: 40px 0;
+  align-items: center;
+  gap: 12px;
+`;
+
+const LoadingText = styled.Text`
+  color: #97C3DC;
+  font-size: 14px;
+`;
+
+const ErrorContainer = styled.View`
+  padding: 40px 20px;
+  align-items: center;
+`;
+
+const ErrorText = styled.Text`
+  color: #FF6B6B;
+  font-size: 14px;
+  text-align: center;
+`;
+
+const EmptyContainer = styled.View`
+  padding: 40px 20px;
+  align-items: center;
+`;
+
+const EmptyText = styled.Text`
+  color: #97C3DC;
+  font-size: 14px;
+  text-align: center;
 `;

@@ -1,13 +1,17 @@
-import React, { useMemo, useRef, useState } from "react";
-import styled from "styled-components/native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { Animated } from "react-native";
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import OverallStatus from "./OverallStatus";
+import React, { useMemo, useRef, useState } from "react";
+import { Animated } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import styled from "styled-components/native";
 import { TYPOGRAPHY } from "../constants/typography";
-import Marker from "./Marker";
 import { useOccupations } from "../hooks/api/useOccupations";
+import { useStores } from "../hooks/api/useStores";
+import { useLocation } from "../hooks/etc/useLocation";
+import { geocodeAddress } from "../utils/geocode";
+import { getTeamFromRatio } from "../utils/teamFromRatio";
+import Marker from "./Marker";
+import OverallStatus from "./OverallStatus";
 
 type Props = {
   query: string;
@@ -28,10 +32,59 @@ export default function SearchPanel({
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['15%', '50%', '90%'], []);
   const [sheetIndex, setSheetIndex] = useState(0);
-  const { data: occupationData } = useOccupations();
+  const { data: occupationData, isLoading, error } = useOccupations();
+  const { data: storesData } = useStores();
+  const { coordinates: userLocation } = useLocation();
+  const [nearbyStores, setNearbyStores] = useState<Array<{ name: string; team: string; distance: number }>>([]);
+
+  // 거리 계산 함수
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // 지구 반지름 (km)
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  React.useEffect(() => {
+    if (!storesData || !userLocation) return;
+
+    const calculateNearbyStores = async () => {
+      const storesWithDistance: Array<{ name: string; team: string; distance: number }> = [];
+
+      for (const store of storesData) {
+        const coords = await geocodeAddress(store.address);
+        if (coords) {
+          const distance = calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            coords.latitude,
+            coords.longitude
+          );
+          const team = getTeamFromRatio(store.ratio);
+          storesWithDistance.push({
+            name: store.store_name,
+            team: team,
+            distance: distance,
+          });
+        }
+      }
+
+      // 거리순 정렬 후 상위 4개만
+      const sorted = storesWithDistance.sort((a, b) => a.distance - b.distance).slice(0, 4);
+      setNearbyStores(sorted);
+    };
+
+    calculateNearbyStores();
+  }, [storesData, userLocation]);
 
   const chartData = useMemo(() => {
     if (!occupationData) {
+      console.log('SearchPanel: No occupation data available', { isLoading, error });
       return [
         { name: '신라', value: 33, color: '#E19B2E' },
         { name: '고구려', value: 34, color: '#B03C3C' },
@@ -39,12 +92,13 @@ export default function SearchPanel({
       ];
     }
 
+    console.log('SearchPanel: Using real occupation data', occupationData);
     return [
       { name: '신라', value: occupationData.shinla_ratio, color: '#E19B2E' },
       { name: '고구려', value: occupationData.goguryeo_ratio, color: '#B03C3C' },
       { name: '백제', value: occupationData.baekjae_ratio, color: '#3D63FF' },
     ];
-  }, [occupationData]);
+  }, [occupationData, isLoading, error]);
 
   return (
     <Container pointerEvents="box-none" $bottomPadding={0}>
@@ -91,7 +145,7 @@ export default function SearchPanel({
                     <ActionLabel>民</ActionLabel>
                   </TeamBadge>
                   <TeamTexts>
-                    <TeamName>백제</TeamName>
+                    <TeamName>신라</TeamName>
                     <TeamSub>국민으로 살기 +283일</TeamSub>
                   </TeamTexts>
                 </TeamRow>
@@ -100,10 +154,18 @@ export default function SearchPanel({
             <ContentContainer>
             <SectionTitle>근처 점령할만한 땅</SectionTitle>
               <Horizontal>
-                  <Marker storeTitle="만주점" teamLabel="고구려" />
-                  <Marker storeTitle="한양카페" teamLabel="고구려" />
-                  <Marker storeTitle="한강유역백반" teamLabel="고구려" />
-                  <Marker storeTitle="척화비국수" teamLabel="고구려" />
+                  {nearbyStores.length > 0 ? (
+                    nearbyStores.map((store, index) => (
+                      <Marker key={index} storeTitle={store.name} teamLabel={store.team} />
+                    ))
+                  ) : (
+                    <>
+                      <Marker storeTitle="만주점" teamLabel="고구려" />
+                      <Marker storeTitle="한양카페" teamLabel="고구려" />
+                      <Marker storeTitle="한강유역백반" teamLabel="고구려" />
+                      <Marker storeTitle="척화비국수" teamLabel="고구려" />
+                    </>
+                  )}
               </Horizontal>
             </ContentContainer>
             <ContentContainer>

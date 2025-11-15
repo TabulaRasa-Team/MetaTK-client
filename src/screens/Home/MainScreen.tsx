@@ -18,7 +18,7 @@ export default function MainScreen() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected] = useState<MapPin | null>(null);
   const [pins, setPins] = useState<MapPin[]>([
-    // 더미 데이터 - 테스트용
+    // 테스트용
     { id: 'dummy1', latitude: 36.3545812, longitude: 127.3687688, title: '카페보다', description: 'cafe', team: '백제', hours: '11:00 - 20:00' },
     { id: 'dummy2', latitude: 35.19110910, longitude: 128.905598, title: '만주점', description: 'food', team: '고구려', hours: '11:00 - 20:00' },
     { id: 'dummy3', latitude: 35.18910910, longitude: 128.906598, title: '신라바', description: 'drink', team: '신라', hours: '11:00 - 20:00' },
@@ -37,11 +37,8 @@ export default function MainScreen() {
 
       for (const store of storesData) {
         try {
-          // 주소를 위도/경도로 변환
           const coords = await geocodeAddress(store.address);
-
           if (coords) {
-            // API 응답에 포함된 ratio로 팀 결정
             const team = getTeamFromRatio(store.ratio);
 
             convertedPins.push({

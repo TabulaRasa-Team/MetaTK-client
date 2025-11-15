@@ -1,17 +1,18 @@
-import React, { useState } from "react";
-import { SafeAreaView, Modal, ActivityIndicator } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import styled from "styled-components/native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import TitleSubtitle from "@/src/components/common/TitleSubtitle";
 import BackButton from "@/src/components/common/BackButton";
+import TitleSubtitle from "@/src/components/common/TitleSubtitle";
 import Button from "@/src/components/ui/Button";
-import { TYPOGRAPHY } from "../../constants/typography";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import type { NavigationProp, RouteProp } from "@react-navigation/native";
-import type { RootStackParamList, RegisterStackParamList } from "../../types/navigation";
 import { Ionicons } from "@expo/vector-icons";
+import type { NavigationProp, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import React, { useState } from "react";
+import { ActivityIndicator, Modal, SafeAreaView } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import styled from "styled-components/native";
+import { TYPOGRAPHY } from "../../constants/typography";
+import type { RegisterStackParamList, RootStackParamList } from "../../types/navigation";
 import { storeApi } from "../../utils/api/store";
+import { useQueryClient } from "@tanstack/react-query";
 
 type RegistSubInfoScreenRouteProp = RouteProp<RegisterStackParamList, 'RegistSubInfoScreen'>;
 
@@ -19,6 +20,7 @@ export default function RegistSubInfoScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const route = useRoute<RegistSubInfoScreenRouteProp>();
+  const queryClient = useQueryClient();
 
   const [desc, setDesc] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
@@ -26,7 +28,6 @@ export default function RegistSubInfoScreen() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleNext = async () => {
-    // 유효성 검사
     if (!desc.trim()) {
       setErrorMessage('가게 소개를 입력해주세요.');
       setShowErrorModal(true);
@@ -43,7 +44,9 @@ export default function RegistSubInfoScreen() {
 
       await storeApi.register(route.params.storeId, desc);
 
-      // 성공 시 홈 화면으로 이동
+      // stores 쿼리 캐시 무효화하여 새로운 가게 데이터 다시 불러오기
+      await queryClient.invalidateQueries({ queryKey: ['stores'] });
+
       navigation.navigate({ name: 'Home', params: { screen: 'MainScreen' } });
     } catch (error: any) {
       console.error('가게 정보 등록 실패:', error);

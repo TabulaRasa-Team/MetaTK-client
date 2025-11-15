@@ -27,6 +27,7 @@ export default function RegistMainInfoScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const route = useRoute<RegistMainInfoScreenRouteProp>();
 
+  const [storeName, setStoreName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [weeklyHours, setWeeklyHours] = useState<WeeklyHours>(
@@ -50,6 +51,12 @@ export default function RegistMainInfoScreen() {
   };
 
   const handleNext = () => {
+    if (!storeName.trim()) {
+      setErrorMessage("가게명을 입력해주세요.");
+      setShowErrorModal(true);
+      return;
+    }
+
     const error = validateStoreInfo(address, phone, weeklyHours);
 
     if (error) {
@@ -66,6 +73,7 @@ export default function RegistMainInfoScreen() {
           businessNumber: route.params?.businessNumber,
           representativeName: route.params?.representativeName,
           openingDate: route.params?.openingDate,
+          storeName,
           address,
           phone,
           weeklyHours,
@@ -86,6 +94,14 @@ export default function RegistMainInfoScreen() {
         <TitleSubtitle title="가게 정보를 입력해주세요." subtitle="이 정보는 나중에 바꿀 수 있어요." style={{ marginBottom: 48, marginLeft: 12}} />
 
         <Form>
+          <Label>가게명</Label>
+          <Input
+            placeholder="주주원"
+            placeholderTextColor="#8795a1"
+            value={storeName}
+            onChangeText={setStoreName}
+          />
+
           <Label>주소</Label>
           <Input
             placeholder="부산광역시 강서구 가락대로 1393"

@@ -91,6 +91,7 @@ export interface OcrResponse {
 
 export interface StoreCreateRequest {
   company_name: string;
+  store_name: string;
   bln: string;
   owner_name: string;
   address: string;

@@ -1,9 +1,9 @@
 import axios from 'axios';
+import { StoreCreateRequest, StoreCreateResponse, StoreDetail, StoreDetailedInfo, StoresResponse } from '../../types/api';
 import { apiClient } from './client';
-import { StoresResponse, StoreDetail, StoreDetailedInfo, StoreCreateRequest, StoreCreateResponse } from '../../types/api';
-import * as FileSystem from 'expo-file-system';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.219.102:8000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const OCR_API_URL = process.env.EXPO_PUBLIC_OCR_API_URL;
 
 interface StoreRegisterResponse {
   success: boolean;
@@ -56,7 +56,7 @@ export const storeApi = {
   register: async (storeId: string, description: string): Promise<StoreRegisterResponse> => {
     try {
       const response = await axios.post<StoreRegisterResponse>(
-        `${API_URL}/store/register`,
+        `${OCR_API_URL}/store/register`,
         {
           store_id: storeId,
           description: description,
@@ -65,7 +65,7 @@ export const storeApi = {
           headers: {
             'Content-Type': 'application/json',
           },
-          timeout: 10000,
+          timeout: 1000000,
         }
       );
 

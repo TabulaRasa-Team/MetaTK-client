@@ -5,9 +5,24 @@ import { PRIMARY_COLORS, TEXT_COLORS } from "../constants/colors";
 import { TYPOGRAPHY } from "../constants/typography";
 
 export default function Marker({ storeTitle, teamLabel }: { storeTitle: string, teamLabel: string }) {
+  const getPinColor = (team: string): string => {
+    switch (team) {
+      case '고구려':
+        return '#C73434';
+      case '백제':
+        return '#2D3EFF';
+      case '신라':
+        return '#FF992D';
+      case '미점령':
+        return '#E5E7EB';
+      default:
+        return '#E5E7EB';
+    }
+  };
+
   return (
     <Container>
-      <Icon name="pin" />
+      <Icon name="pin" primaryColor={getPinColor(teamLabel)} />
       <Text style={{ ...TYPOGRAPHY.SECTION_2, color: PRIMARY_COLORS.DEFAULT }}>{storeTitle}</Text>
       <Text style={{ ...TYPOGRAPHY.SECTION_2, color: TEXT_COLORS.SUB }}>{teamLabel}</Text>
     </Container>

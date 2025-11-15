@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import type { NavigationProp, RouteProp } from "@react-navigation/native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
-import { FlatList, KeyboardAvoidingView, Platform, SafeAreaView, ActivityIndicator } from "react-native";
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import { TYPOGRAPHY } from "../../constants/typography";
@@ -25,50 +25,7 @@ export default function ChatBotScreen() {
   const insets = useSafeAreaInsets();
   const storeId = route.params?.storeId;
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: '가게 사장님이 작성하신 내용을 바탕으로 답변해드립니다',
-      isUser: false,
-      timestamp: '어제 9:41',
-    },
-    {
-      id: '2',
-      text: '주주원 부산광역시 강서구에 위치하는 중국집입니다.',
-      isUser: false,
-      timestamp: '',
-    },
-    {
-      id: '3',
-      text: '하이',
-      isUser: true,
-      timestamp: '',
-    },
-    {
-      id: '4',
-      text: '안녕하세요',
-      isUser: false,
-      timestamp: '',
-    },
-    {
-      id: '5',
-      text: '너네 집 대표메뉴가 뭐야',
-      isUser: true,
-      timestamp: '',
-    },
-    {
-      id: '6',
-      text: '짜장면도 잘하구요, 탕수육도 기가막히게 합니다.',
-      isUser: false,
-      timestamp: '',
-    },
-    {
-      id: '7',
-      text: '확인했다~~',
-      isUser: true,
-      timestamp: '',
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -171,7 +128,7 @@ export default function ChatBotScreen() {
           <BackText>뒤로가기</BackText>
         </BackButton>
         <HeaderInfo>
-          <StoreName>주주원</StoreName>
+          <StoreName></StoreName>
           <PhoneNumber>전화번호 : 051-972-078</PhoneNumber>
         </HeaderInfo>
       </Header>

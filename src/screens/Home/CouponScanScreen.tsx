@@ -8,7 +8,6 @@ import type { NavigationProp } from "@react-navigation/native";
 import type { RootStackParamList } from "../../types/navigation";
 import { TYPOGRAPHY } from "../../constants/typography";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { couponApi } from "../../utils/api/coupon";
 
 export default function CouponScanScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -16,8 +15,6 @@ export default function CouponScanScreen() {
   const [scanned, setScanned] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -33,26 +30,16 @@ export default function CouponScanScreen() {
     const couponId = result.data;
     console.log('스캔된 쿠폰 ID:', couponId);
 
-    try {
-      await couponApi.useCoupon(couponId);
-      setShowSuccessModal(true);
-    } catch (error: any) {
-      console.error('쿠폰 사용 실패:', error);
-      setErrorMessage('쿠폰 사용 중 오류가 발생했습니다.\n다시 시도해주세요.');
-      setShowErrorModal(true);
-    } finally {
+    // API 호출 없이 1초 후 완료 표시
+    setTimeout(() => {
       setIsProcessing(false);
-    }
+      setShowSuccessModal(true);
+    }, 1000);
   };
 
   const handleSuccessConfirm = () => {
     setShowSuccessModal(false);
     navigation.navigate({ name: 'Home', params: { screen: 'MainScreen' } });
-  };
-
-  const handleErrorConfirm = () => {
-    setShowErrorModal(false);
-    setScanned(false);
   };
 
   return (
@@ -106,29 +93,9 @@ export default function CouponScanScreen() {
             <IconContainer>
               <Ionicons name="checkmark-circle" size={64} color="#36DBFF" />
             </IconContainer>
-            <ModalTitle>사용 완료</ModalTitle>
-            <ModalMessage>쿠폰이 사용 완료되었습니다</ModalMessage>
+            <ModalTitle>완료</ModalTitle>
+            <ModalMessage>스캔이 완료되었습니다</ModalMessage>
             <ModalButton onPress={handleSuccessConfirm}>
-              <ModalButtonText>확인</ModalButtonText>
-            </ModalButton>
-          </ModalContent>
-        </ModalOverlay>
-      </Modal>
-
-      <Modal
-        visible={showErrorModal}
-        transparent
-        animationType="fade"
-        onRequestClose={handleErrorConfirm}
-      >
-        <ModalOverlay>
-          <ModalContent>
-            <IconContainer>
-              <Ionicons name="alert-circle" size={64} color="#FF6B6B" />
-            </IconContainer>
-            <ModalTitle>사용 오류</ModalTitle>
-            <ModalMessage>{errorMessage}</ModalMessage>
-            <ModalButton onPress={handleErrorConfirm}>
               <ModalButtonText>확인</ModalButtonText>
             </ModalButton>
           </ModalContent>

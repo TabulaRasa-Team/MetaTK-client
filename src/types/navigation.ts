@@ -19,11 +19,13 @@ export type RegisterStackParamList = {
     businessNumber?: string;
     representativeName?: string;
     openingDate?: string;
+    storeName?: string;
   };
   RegistPictureInfoScreen: {
     businessNumber?: string;
     representativeName?: string;
     openingDate?: string;
+    storeName: string;
     address: string;
     phone: string;
     weeklyHours: { [key: string]: { start: string; end: string } };

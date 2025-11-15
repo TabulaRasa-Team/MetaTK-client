@@ -174,8 +174,12 @@ export default function RegistPictureInfoScreen() {
       });
 
       // API 요청 데이터 구성
+      console.log('Route params:', route.params);
+      console.log('Store name from params:', route.params.storeName);
+
       const requestData = {
         company_name: route.params.businessNumber ? 'Company Name' : 'Default Company',
+        store_name: route.params.storeName,
         bln: route.params.businessNumber || 'XXX-XX-XXXXX',
         owner_name: route.params.representativeName || '점주',
         address: route.params.address,
@@ -185,6 +189,12 @@ export default function RegistPictureInfoScreen() {
         menus: menusWithBase64,
         images: imagesBase64,
       };
+
+      console.log('Request data being sent:', {
+        ...requestData,
+        menus: `${menusWithBase64.length} menus`,
+        images: `${imagesBase64.length} images`
+      });
 
       // 가게 생성 API 호출
       const response = await storeApi.create(requestData);
@@ -431,6 +441,7 @@ const ImagesGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
   gap: 8px;
+  justify-content: flex-start;
 `;
 
 const ThumbContainer = styled.View`

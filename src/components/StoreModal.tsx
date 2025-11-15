@@ -38,14 +38,18 @@ export default function StoreModal({
 
   const ratioData = useMemo(() => {
     if (storeDetail?.ratio) {
+      const ratio = storeDetail.ratio as any;
       return {
-        goguryeo: storeDetail.ratio.goguryeo_ratio,
-        baekjae: storeDetail.ratio.baekjae_ratio,
-        shinla: storeDetail.ratio.shinla_ratio,
+        goguryeo: ratio.goguryeo_ratio_ratio ?? ratio.goguryeo_ratio ?? 0,
+        baekjae: ratio.baekjae_ratio_ratio ?? ratio.baekjae_ratio ?? 0,
+        shinla: ratio.shinla_ratio_ratio ?? ratio.shinla_ratio ?? 0,
       };
     }
-    return { goguryeo: shares.a, baekjae: shares.b, shinla: shares.c };
+    return { goguryeo: shares?.a ?? 0, baekjae: shares?.b ?? 0, shinla: shares?.c ?? 0 };
   }, [storeDetail, shares]);
+
+  // 미점령 상태 확인 (모든 비율이 0)
+  const isUnoccupied = ratioData.goguryeo === 0 && ratioData.baekjae === 0 && ratioData.shinla === 0;
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Overlay onPress={onClose}>
@@ -72,32 +76,38 @@ export default function StoreModal({
                 ) : null}
               </View>
 
-              <BarWrap>
-                <BarSegment
-                  style={{
-                    flex: ratioData.goguryeo,
-                    backgroundColor: 'rgba(199, 52, 52, 0.40)',
-                  }}
-                >
-                  <BarLabel>{ratioData.goguryeo.toFixed(1)}%</BarLabel>
-                </BarSegment>
-                <BarSegment
-                  style={{
-                    flex: ratioData.baekjae,
-                    backgroundColor: 'rgba(45, 62, 255, 0.40)',
-                  }}
-                >
-                  <BarLabel>{ratioData.baekjae.toFixed(1)}%</BarLabel>
-                </BarSegment>
-                <BarSegment
-                  style={{
-                    flex: ratioData.shinla,
-                    backgroundColor: 'rgba(255, 153, 45, 0.40)',
-                  }}
-                >
-                  <BarLabel>{ratioData.shinla.toFixed(1)}%</BarLabel>
-                </BarSegment>
-              </BarWrap>
+              {isUnoccupied ? (
+                <EmptyBarWrap>
+                  <EmptyBarText>미점령</EmptyBarText>
+                </EmptyBarWrap>
+              ) : (
+                <BarWrap>
+                  <BarSegment
+                    style={{
+                      flex: ratioData.goguryeo,
+                      backgroundColor: 'rgba(199, 52, 52, 0.40)',
+                    }}
+                  >
+                    <BarLabel>{ratioData.goguryeo.toFixed(1)}%</BarLabel>
+                  </BarSegment>
+                  <BarSegment
+                    style={{
+                      flex: ratioData.baekjae,
+                      backgroundColor: 'rgba(45, 62, 255, 0.40)',
+                    }}
+                  >
+                    <BarLabel>{ratioData.baekjae.toFixed(1)}%</BarLabel>
+                  </BarSegment>
+                  <BarSegment
+                    style={{
+                      flex: ratioData.shinla,
+                      backgroundColor: 'rgba(255, 153, 45, 0.40)',
+                    }}
+                  >
+                    <BarLabel>{ratioData.shinla.toFixed(1)}%</BarLabel>
+                  </BarSegment>
+                </BarWrap>
+              )}
               <View>
                 <Button title="가게 정보 보기" onPress={onPressInfo} variant="primary" />
                 <Button title="점령하기" onPress={onPressConquer} variant="secondary" />
@@ -164,6 +174,20 @@ const BarWrap = styled.View`
   overflow: hidden;
   flex-direction: row;
   background-color: rgba(255,255,255,0.06);
+`;
+
+const EmptyBarWrap = styled.View`
+  margin-top: 16px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: rgba(229, 231, 235, 0.15);
+  align-items: center;
+  justify-content: center;
+`;
+
+const EmptyBarText = styled.Text`
+  color: #8795a1;
+  ${TYPOGRAPHY.SECTION_1}
 `;
 
 const BarSegment = styled.View`
